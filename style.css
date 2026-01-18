@@ -2,77 +2,140 @@
 
 :root {
   --gold: #d4af37;
-  --gold-glow: rgba(212, 175, 55, 0.4);
+  --gold-glow: rgba(212, 175, 55, 0.6);
   --dark-bg: #050202;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(20, 10, 10, 0.4);
+  --glass-border: rgba(255, 230, 200, 0.08);
 }
 
-body {
-  background-color: var(--dark-bg);
+html {
+  height: 100%;
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
+body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at top, #1a0d0d 0%, #070303 60%, #000000 100%);
+  color: white;
+  perspective: 1400px; /* Global Perspective */
+  transform-style: preserve-3d;
+  overflow-x: hidden;
+}
+
+/* Film Grain Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: overlay;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #000;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
+  background: linear-gradient(to bottom, #333, var(--gold));
+  border-radius: 3px;
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-}
+/* --- 3D UTILITIES --- */
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-}
-
-/* 3D Card Effect */
-.card-3d-wrapper {
+/* Scene Container - Essential for nested 3D elements */
+.scene-3d {
+  transform-style: preserve-3d;
   perspective: 1000px;
 }
 
-.card-3d {
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
+/* Glassmorphism Luxury */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 
-.card-3d:hover {
-  transform: translateY(-10px) rotateX(5deg);
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5), 0 0 20px -5px var(--gold-glow);
-  border-color: rgba(212, 175, 55, 0.3);
+/* 3D Floating Animations */
+@keyframes float-y-slow {
+  0%, 100% { transform: translateY(0px) translateZ(0); }
+  50% { transform: translateY(-15px) translateZ(0); }
+}
+
+@keyframes float-y-fast {
+  0%, 100% { transform: translateY(0px) translateZ(20px); }
+  50% { transform: translateY(-8px) translateZ(20px); }
 }
 
 /* Text Gradients */
-.text-gradient-gold {
-  background: linear-gradient(to right, #d4af37, #f3e5ab, #d4af37);
+.text-gold-gradient {
+  background: linear-gradient(to bottom right, #fff, #d4af37, #f3e5ab, #d4af37);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  background-size: 200% auto;
-  animation: shine 4s linear infinite;
+  text-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-@keyframes shine {
-  to {
-    background-position: 200% center;
-  }
+.text-shadow-3d {
+  text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+/* --- HERO SPECIFIC --- */
+.hero-scene {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* --- CARD 3D STYLES --- */
+.card-3d-wrapper {
+  perspective: 2000px;
+}
+
+.card-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-3d:hover {
+  transform: rotateX(8deg) rotateY(-4deg) translateZ(30px);
+}
+
+.card-layer-base {
+  transform: translateZ(0px);
+}
+.card-layer-mid {
+  transform: translateZ(30px);
+}
+.card-layer-top {
+  transform: translateZ(60px);
+}
+
+/* --- BUTTON 3D --- */
+.btn-cinematic {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.4s ease;
+  transform: translateZ(20px);
+}
+
+.btn-cinematic:hover {
+  transform: translateZ(50px) scale(1.05);
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
 }
 
 /* Loader */
@@ -84,18 +147,4 @@ body {
   height: 40px;
   animation: spin 1s linear infinite;
 }
-
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* Hero Pattern */
-.bg-hero-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-
-.animate-pulse-slow {
-  animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.8; }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
