@@ -39,19 +39,19 @@ const FeedbackSection: React.FC = () => {
   };
 
   return (
-    <section className="py-24 px-6 relative bg-gradient-to-b from-[#120808] to-brand-dark overflow-hidden">
+    <section className="py-24 px-6 relative bg-gradient-to-b from-[#120808] to-brand-dark overflow-hidden scene-3d">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
       
-      <div className="container mx-auto relative z-10">
+      <div className="container mx-auto relative z-10 card-3d-wrapper">
         <SectionTitle title={t.feedback.title} subtitle={t.feedback.subtitle} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           
           {/* Left Column: Feedback Form */}
-          <div className="glass-dark p-8 md:p-12 rounded-2xl border border-white/10 shadow-2xl relative">
+          <div className="glass-dark p-8 md:p-12 rounded-2xl relative shadow-2xl card-3d">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-gold/10 rounded-full blur-[60px] pointer-events-none"></div>
             
-            <h3 className="text-2xl font-serif font-bold text-white mb-8 flex items-center gap-3">
+            <h3 className="text-2xl font-serif font-bold text-white mb-8 flex items-center gap-3 card-layer-mid">
               <span className="w-1 h-8 bg-brand-gold rounded-full"></span>
               {t.feedback.form_heading}
             </h3>
@@ -65,7 +65,7 @@ const FeedbackSection: React.FC = () => {
                 <p className="text-gray-400">{t.feedback.success}</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 card-layer-base">
                 {/* Rating Input */}
                 <div>
                   <label className="block text-sm uppercase tracking-widest text-brand-gold font-bold mb-3">
@@ -126,7 +126,7 @@ const FeedbackSection: React.FC = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-brand-gold to-[#b49021] text-black font-bold py-4 rounded-lg uppercase tracking-widest hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-brand-gold to-[#b49021] text-black font-bold py-4 rounded-lg uppercase tracking-widest hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 btn-cinematic"
                 >
                   {t.feedback.submit_btn} <Send size={18} />
                 </button>
@@ -135,15 +135,15 @@ const FeedbackSection: React.FC = () => {
           </div>
 
           {/* Right Column: Reviews List */}
-          <div className="relative">
-             <h3 className="text-2xl font-serif font-bold text-white mb-8 flex items-center gap-3">
+          <div className="relative card-3d">
+             <h3 className="text-2xl font-serif font-bold text-white mb-8 flex items-center gap-3 card-layer-mid">
               <span className="w-1 h-8 bg-brand-red rounded-full"></span>
               {t.feedback.reviews_heading}
             </h3>
             
-            <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-brand-gold/50">
+            <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-brand-gold/50 card-layer-base">
               {reviews.map((review) => (
-                <div key={review.id} className="bg-[#1a1515] p-6 rounded-xl border border-white/5 hover:border-brand-gold/30 transition-all duration-300 group">
+                <div key={review.id} className="bg-[#1a1515] p-6 rounded-xl border border-white/5 hover:border-brand-gold/30 transition-all duration-300 group hover:translate-x-2">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-maroon/20 flex items-center justify-center text-brand-gold font-serif font-bold text-lg border border-brand-maroon/30">

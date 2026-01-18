@@ -42,6 +42,10 @@ const AdminDashboard: React.FC = () => {
   const [editInfo, setEditInfo] = useState(businessInfo);
   const [editContent, setEditContent] = useState(siteContent);
 
+  // Feedback Delete State
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState('');
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -112,6 +116,20 @@ const AdminDashboard: React.FC = () => {
     await updateSiteContent(editContent);
     setIsUploading(false);
     alert('Website content updated successfully!');
+  };
+
+  const confirmDeleteFeedback = async () => {
+    if (reviewToDelete) {
+      try {
+        await deleteReview(reviewToDelete);
+        setReviewToDelete(null);
+        setDeleteSuccessMsg(t.admin.delete_success);
+        setTimeout(() => setDeleteSuccessMsg(''), 3000);
+      } catch (e) {
+        console.error("Delete failed", e);
+        alert("Failed to delete review");
+      }
+    }
   };
 
   if (authLoading) return <div className="min-h-screen bg-brand-dark flex items-center justify-center"><Loader2 className="animate-spin text-brand-gold" /></div>;
@@ -289,7 +307,12 @@ const AdminDashboard: React.FC = () => {
   );
 
   const renderFeedback = () => (
-     <div className="bg-[#120808] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+     <div className="bg-[#120808] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative">
+        {deleteSuccessMsg && (
+            <div className="absolute top-0 left-0 w-full bg-green-500/90 text-white text-center py-2 font-bold z-10 animate-fade-in-up">
+                {deleteSuccessMsg}
+            </div>
+        )}
         <div className="p-6 border-b border-white/10 bg-white/5">
             <h3 className="font-bold text-brand-gold uppercase tracking-widest text-sm">Customer Feedback ({reviews.length})</h3>
         </div>
@@ -304,8 +327,8 @@ const AdminDashboard: React.FC = () => {
                         <p className="text-gray-400 text-sm">"{review.text}"</p>
                         <p className="text-xs text-gray-600 mt-1">{review.date}</p>
                     </div>
-                    <button onClick={() => deleteReview(review.id)} className="flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded text-xs font-bold uppercase hover:bg-red-500 hover:text-white transition-colors">
-                        <Trash2 size={14} /> Delete
+                    <button onClick={() => setReviewToDelete(review.id)} className="flex items-center gap-2 px-3 py-1 bg-red-500/10 text-red-500 rounded text-xs font-bold uppercase hover:bg-red-500 hover:text-white transition-colors">
+                        <Trash2 size={14} /> {t.admin.delete}
                     </button>
                 </div>
             ))}
@@ -406,6 +429,27 @@ const AdminDashboard: React.FC = () => {
               </button>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {reviewToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-fade-in-up">
+            <div className="bg-[#1a1515] border border-red-500/30 p-8 rounded-2xl w-full max-w-md text-center shadow-[0_0_50px_rgba(239,68,68,0.2)]">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20 text-red-500">
+                    <Trash2 size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{t.admin.delete}</h3>
+                <p className="text-gray-400 mb-8">{t.admin.confirm_delete}</p>
+                <div className="flex gap-4">
+                    <button onClick={() => setReviewToDelete(null)} className="flex-1 py-3 rounded-lg bg-white/5 text-white hover:bg-white/10 font-bold uppercase text-xs tracking-widest transition-colors">
+                        Cancel
+                    </button>
+                    <button onClick={confirmDeleteFeedback} className="flex-1 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold uppercase text-xs tracking-widest transition-colors shadow-lg">
+                        Delete
+                    </button>
+                </div>
+            </div>
         </div>
       )}
     </div>

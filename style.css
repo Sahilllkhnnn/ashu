@@ -56,6 +56,10 @@ body::before {
   perspective: 1000px;
 }
 
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
 /* Glassmorphism Luxury */
 .glass-panel {
   background: var(--glass-bg);
@@ -65,6 +69,16 @@ body::before {
   box-shadow: 
     0 10px 30px rgba(0,0,0,0.5),
     inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.glass-dark {
+  background: rgba(18, 8, 8, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 20px 50px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
 }
 
 /* 3D Floating Animations */
