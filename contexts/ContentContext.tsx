@@ -33,7 +33,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (!error && servicesData) {
+      if (!error && servicesData && servicesData.length > 0) {
         setServices(servicesData.map(s => ({
           id: s.id,
           title: s.title,
@@ -71,7 +71,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let imageUrl = service.imageUrl;
 
       if (imageFile) {
-        const fileName = `svc-${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from('service-images')
           .upload(fileName, imageFile);
@@ -128,7 +129,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (imageUrl) {
         const urlParts = imageUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];
-        if (fileName) await supabase.storage.from('service-images').remove([fileName]);
+        if (fileName) {
+            await supabase.storage.from('service-images').remove([fileName]);
+        }
       }
 
       await refreshContent();

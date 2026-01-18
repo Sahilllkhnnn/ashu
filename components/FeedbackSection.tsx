@@ -14,25 +14,27 @@ const FeedbackSection: React.FC = () => {
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (name && rating > 0 && message) {
       const newReview = {
-        id: Date.now(),
         name,
         rating,
-        text: message,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        text: message
       };
       
-      addReview(newReview);
-      setSubmitted(true);
-      setName('');
-      setMessage('');
-      setRating(0);
-      
-      // Reset success message after 3 seconds
-      setTimeout(() => setSubmitted(false), 5000);
+      try {
+        await addReview(newReview);
+        setSubmitted(true);
+        setName('');
+        setMessage('');
+        setRating(0);
+        
+        // Reset success message after 5 seconds
+        setTimeout(() => setSubmitted(false), 5000);
+      } catch (e) {
+        console.error("Failed to submit feedback", e);
+      }
     }
   };
 

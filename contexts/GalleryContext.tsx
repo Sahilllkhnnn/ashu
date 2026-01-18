@@ -23,7 +23,7 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (data) {
+      if (data && data.length > 0) {
         const formattedItems: GalleryItem[] = data.map(item => ({
           id: item.id,
           title: item.title,
@@ -32,11 +32,11 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
         setGalleryItems(formattedItems);
       } else {
-        setGalleryItems(DEFAULT_GALLERY.map(i => ({...i, id: i.id.toString()})));
+        setGalleryItems(DEFAULT_GALLERY);
       }
     } catch (err) {
-      console.error('Error:', err);
-      setGalleryItems(DEFAULT_GALLERY.map(i => ({...i, id: i.id.toString()})));
+      console.error('Error fetching gallery:', err);
+      setGalleryItems(DEFAULT_GALLERY);
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,8 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const uploadImage = async (file: File, title: string, category: string) => {
     try {
-      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('gallery-images')
@@ -84,6 +85,7 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (dbError) throw dbError;
 
+      // Extract filename from URL
       const urlParts = imageUrl.split('/');
       const fileName = urlParts[urlParts.length - 1];
       

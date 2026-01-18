@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Testimonial } from '../types';
 import { supabase } from '../lib/supabaseClient';
+import { TESTIMONIALS as DEFAULT_REVIEWS } from '../constants';
 
 interface FeedbackContextType {
   reviews: Testimonial[];
@@ -22,7 +23,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (data) {
+      if (data && data.length > 0) {
         const formattedReviews: Testimonial[] = data.map(item => ({
           id: item.id,
           name: item.name,
@@ -31,9 +32,12 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           date: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
         }));
         setReviews(formattedReviews);
+      } else {
+        setReviews(DEFAULT_REVIEWS);
       }
     } catch (err) {
       console.error('Error fetching reviews:', err);
+      setReviews(DEFAULT_REVIEWS);
     } finally {
       setLoading(false);
     }
