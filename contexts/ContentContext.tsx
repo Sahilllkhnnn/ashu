@@ -8,8 +8,8 @@ interface ContentContextType {
   businessInfo: BusinessInfo;
   siteContent: SiteContent;
   updateService: (service: Service) => Promise<void>;
-  addService: (service: Omit<Service, 'id'>) => Promise<void>;
-  deleteService: (id: string) => Promise<void>;
+  addService: (service: Omit<Service, 'id'>, imageFile?: File) => Promise<void>;
+  deleteService: (id: string, imageUrl?: string) => Promise<void>;
   updateBusinessInfo: (info: BusinessInfo) => Promise<void>;
   updateSiteContent: (content: SiteContent) => Promise<void>;
   loading: boolean;
@@ -27,28 +27,33 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refreshContent = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Services from Supabase
+      // 1. Fetch Services
       const { data: servicesData, error } = await supabase
         .from('services')
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching services:', error);
-      } else if (servicesData && servicesData.length > 0) {
+      if (!error && servicesData) {
         setServices(servicesData.map(s => ({
-          id: s.id.toString(), // Ensure string ID
+          id: s.id,
           title: s.title,
           description: s.description,
-          iconName: s.icon, // DB column 'icon' maps to type 'iconName'
-          active: true // Default to true as DB schema might not have active col
+          iconName: s.icon_name || 'Tent',
+          imageUrl: s.image_url,
+          category: s.category,
+          active: s.active
         })));
       }
 
-      // 2. Business Info & Content
-      // Since specific tables weren't provided for these, we'll keep them static/local
-      // or check a generic 'settings' table if available. For now, using Defaults.
-      // This ensures the site works even if only 'services' table exists.
+      // 2. Fetch Settings (Business Info & Site Content)
+      const { data: settingsData } = await supabase.from('settings').select('*');
+      
+      if (settingsData) {
+        settingsData.forEach(item => {
+          if (item.key === 'business_info') setBusinessInfo(item.value);
+          if (item.key === 'site_content') setSiteContent(item.value);
+        });
+      }
 
     } catch (err) {
       console.error('Error fetching content:', err);
@@ -61,20 +66,38 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refreshContent();
   }, []);
 
-  const addService = async (service: Omit<Service, 'id'>) => {
+  const addService = async (service: Omit<Service, 'id'>, imageFile?: File) => {
     try {
+      let imageUrl = service.imageUrl;
+
+      if (imageFile) {
+        const fileName = `svc-${Date.now()}-${imageFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const { error: uploadError } = await supabase.storage
+          .from('service-images')
+          .upload(fileName, imageFile);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('service-images')
+          .getPublicUrl(fileName);
+          
+        imageUrl = publicUrl;
+      }
+
       const { error } = await supabase.from('services').insert([{
         title: service.title,
         description: service.description,
-        icon: service.iconName, // Map back to DB column
+        icon_name: service.iconName,
+        image_url: imageUrl,
+        category: service.category
       }]);
       
       if (error) throw error;
       await refreshContent();
     } catch (e) {
       console.error("Add service error", e);
-      // Fallback for demo
-      setServices([...services, { ...service, id: Date.now().toString() }]);
+      throw e;
     }
   };
 
@@ -85,7 +108,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .update({
           title: service.title,
           description: service.description,
-          icon: service.iconName
+          icon_name: service.iconName,
+          image_url: service.imageUrl
         })
         .eq('id', service.id);
 
@@ -96,10 +120,17 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const deleteService = async (id: string) => {
+  const deleteService = async (id: string, imageUrl?: string) => {
     try {
       const { error } = await supabase.from('services').delete().eq('id', id);
       if (error) throw error;
+
+      if (imageUrl) {
+        const urlParts = imageUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        if (fileName) await supabase.storage.from('service-images').remove([fileName]);
+      }
+
       await refreshContent();
     } catch (e) {
       console.error("Delete service error", e);
@@ -107,13 +138,21 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateBusinessInfo = async (info: BusinessInfo) => {
-    // Implement if settings table exists, else local state only
-    setBusinessInfo(info);
+    try {
+      await supabase.from('settings').upsert({ key: 'business_info', value: info });
+      setBusinessInfo(info);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const updateSiteContent = async (content: SiteContent) => {
-    // Implement if settings table exists, else local state only
-    setSiteContent(content);
+    try {
+      await supabase.from('settings').upsert({ key: 'site_content', value: content });
+      setSiteContent(content);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (

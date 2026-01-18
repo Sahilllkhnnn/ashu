@@ -1,15 +1,17 @@
 import { LucideIcon } from 'lucide-react';
 
 export interface Service {
-  id: string;
+  id: string; // UUID
   title: string;
   description: string;
-  iconName: string; // Changed from icon object to string name for DB storage
+  iconName: string; 
+  imageUrl?: string; // Added for image support
+  category?: string;
   active?: boolean;
 }
 
 export interface Testimonial {
-  id: number;
+  id: string; // UUID
   name: string;
   rating: number;
   text: string;
@@ -18,7 +20,7 @@ export interface Testimonial {
 }
 
 export interface GalleryItem {
-  id: number;
+  id: string; // UUID
   category: 'Wedding' | 'Tent' | 'Lighting' | 'Party';
   imageUrl: string;
   title: string;

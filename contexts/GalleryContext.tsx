@@ -6,7 +6,7 @@ import { GALLERY_ITEMS as DEFAULT_GALLERY } from '../constants';
 interface GalleryContextType {
   galleryItems: GalleryItem[];
   uploadImage: (file: File, title: string, category: string) => Promise<void>;
-  deleteImage: (id: number, imageUrl: string) => Promise<void>;
+  deleteImage: (id: string, imageUrl: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -23,10 +23,7 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching gallery:', error);
-        setGalleryItems(DEFAULT_GALLERY);
-      } else if (data) {
+      if (data) {
         const formattedItems: GalleryItem[] = data.map(item => ({
           id: item.id,
           title: item.title,
@@ -34,10 +31,12 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
           imageUrl: item.image_url,
         }));
         setGalleryItems(formattedItems);
+      } else {
+        setGalleryItems(DEFAULT_GALLERY.map(i => ({...i, id: i.id.toString()})));
       }
     } catch (err) {
       console.error('Error:', err);
-      setGalleryItems(DEFAULT_GALLERY);
+      setGalleryItems(DEFAULT_GALLERY.map(i => ({...i, id: i.id.toString()})));
     } finally {
       setLoading(false);
     }
@@ -51,19 +50,16 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       
-      // 1. Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('gallery-images')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // 2. Get Public URL
       const { data: { publicUrl } } = supabase.storage
         .from('gallery-images')
         .getPublicUrl(fileName);
 
-      // 3. Insert record into DB
       const { error: dbError } = await supabase.from('gallery').insert([{
         title,
         category,
@@ -79,9 +75,8 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const deleteImage = async (id: number, imageUrl: string) => {
+  const deleteImage = async (id: string, imageUrl: string) => {
     try {
-      // 1. Delete from DB
       const { error: dbError } = await supabase
         .from('gallery')
         .delete()
@@ -89,17 +84,11 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (dbError) throw dbError;
 
-      // 2. Delete from storage (Extract filename from URL)
-      // URL format: .../storage/v1/object/public/gallery-images/filename
       const urlParts = imageUrl.split('/');
       const fileName = urlParts[urlParts.length - 1];
       
       if (fileName) {
-        const { error: storageError } = await supabase.storage
-          .from('gallery-images')
-          .remove([fileName]);
-          
-        if (storageError) console.warn("Storage deletion error (image might persist):", storageError);
+        await supabase.storage.from('gallery-images').remove([fileName]);
       }
 
       setGalleryItems(prev => prev.filter(item => item.id !== id));

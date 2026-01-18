@@ -30,6 +30,7 @@ const AdminDashboard: React.FC = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
   const [serviceForm, setServiceForm] = useState({ title: '', description: '', iconName: 'Tent' });
+  const [serviceImageFile, setServiceImageFile] = useState<File | null>(null);
 
   // Gallery Upload State
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -52,14 +53,25 @@ const AdminDashboard: React.FC = () => {
 
   const handleSaveService = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingService) {
-      await updateService({ ...editingService, ...serviceForm });
-    } else {
-      await addService(serviceForm);
+    setIsUploading(true);
+    try {
+      if (editingService) {
+        // Edit mode (image update not implemented in this simple modal for brevity, but model supports it)
+        await updateService({ ...editingService, ...serviceForm });
+      } else {
+        // Add mode
+        await addService(serviceForm, serviceImageFile || undefined);
+      }
+      setIsServiceModalOpen(false);
+      setEditingService(null);
+      setServiceForm({ title: '', description: '', iconName: 'Tent' });
+      setServiceImageFile(null);
+    } catch (e) {
+      console.error(e);
+      alert('Error saving service');
+    } finally {
+      setIsUploading(false);
     }
-    setIsServiceModalOpen(false);
-    setEditingService(null);
-    setServiceForm({ title: '', description: '', iconName: 'Tent' });
   };
 
   const openEditService = (service: any) => {
@@ -86,8 +98,10 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleSaveContent = async () => {
+    setIsUploading(true);
     await updateBusinessInfo(editInfo);
     await updateSiteContent(editContent);
+    setIsUploading(false);
     alert('Website content updated successfully!');
   };
 
@@ -205,8 +219,12 @@ const AdminDashboard: React.FC = () => {
         {services.map(service => (
           <div key={service.id} className="bg-[#120808] border border-white/10 p-4 rounded-xl flex justify-between items-start group">
             <div className="flex gap-4">
-              <div className="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold">
-                <DynamicIcon name={service.iconName} size={24} />
+              <div className="w-12 h-12 bg-brand-gold/10 rounded-lg flex items-center justify-center text-brand-gold overflow-hidden">
+                {service.imageUrl ? (
+                    <img src={service.imageUrl} alt={service.title} className="w-full h-full object-cover" />
+                ) : (
+                    <DynamicIcon name={service.iconName} size={24} />
+                )}
               </div>
               <div>
                 <h3 className="text-white font-bold">{service.title}</h3>
@@ -215,7 +233,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <button onClick={() => openEditService(service)} className="p-2 bg-white/5 rounded text-gray-300 hover:text-brand-gold"><Edit2 size={16} /></button>
-              <button onClick={() => deleteService(service.id)} className="p-2 bg-red-500/10 rounded text-red-500 hover:bg-red-500 hover:text-white"><Trash2 size={16} /></button>
+              <button onClick={() => deleteService(service.id, service.imageUrl)} className="p-2 bg-red-500/10 rounded text-red-500 hover:bg-red-500 hover:text-white"><Trash2 size={16} /></button>
             </div>
           </div>
         ))}
@@ -256,8 +274,8 @@ const AdminDashboard: React.FC = () => {
             <label className="block text-gray-400 text-xs uppercase font-bold mb-1">Title Line 2</label>
             <input type="text" value={editContent.hero.title_line2} onChange={(e) => setEditContent({...editContent, hero: {...editContent.hero, title_line2: e.target.value}})} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm" />
         </div>
-        <button onClick={handleSaveContent} className="w-full bg-brand-gold text-black font-bold py-3 rounded-lg uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2">
-            <Save size={18} /> Save Changes
+        <button onClick={handleSaveContent} disabled={isUploading} className="w-full bg-brand-gold text-black font-bold py-3 rounded-lg uppercase tracking-widest hover:bg-white transition-colors flex items-center justify-center gap-2">
+            {isUploading ? 'Saving...' : <><Save size={18} /> Save Changes</>}
         </button>
       </div>
     </div>
@@ -362,7 +380,12 @@ const AdminDashboard: React.FC = () => {
                 <textarea rows={3} value={serviceForm.description} onChange={e => setServiceForm({...serviceForm, description: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white" required />
               </div>
               <div>
-                <label className="block text-gray-400 text-xs uppercase font-bold mb-1">Icon</label>
+                  <label className="block text-gray-400 text-xs uppercase font-bold mb-1">Image (Optional)</label>
+                  <input type="file" accept="image/*" onChange={(e) => setServiceImageFile(e.target.files ? e.target.files[0] : null)} className="w-full text-gray-400 text-xs mb-2" />
+                  <p className="text-xs text-gray-500 mb-2">Or select an icon below:</p>
+              </div>
+              <div>
+                <label className="block text-gray-400 text-xs uppercase font-bold mb-1">Icon (Fallback)</label>
                 <div className="grid grid-cols-6 gap-2 h-32 overflow-y-auto bg-white/5 p-2 rounded border border-white/10">
                    {Object.keys(ICON_MAP).map(iconName => (
                      <button key={iconName} type="button" onClick={() => setServiceForm({...serviceForm, iconName})} className={`p-2 rounded flex items-center justify-center ${serviceForm.iconName === iconName ? 'bg-brand-gold text-black' : 'text-gray-400 hover:bg-white/10'}`}>
@@ -371,7 +394,9 @@ const AdminDashboard: React.FC = () => {
                    ))}
                 </div>
               </div>
-              <button type="submit" className="w-full bg-brand-gold text-black font-bold py-3 rounded-lg uppercase tracking-widest hover:bg-white transition-colors">Save Service</button>
+              <button type="submit" disabled={isUploading} className="w-full bg-brand-gold text-black font-bold py-3 rounded-lg uppercase tracking-widest hover:bg-white transition-colors">
+                  {isUploading ? 'Saving...' : 'Save Service'}
+              </button>
             </form>
           </div>
         </div>

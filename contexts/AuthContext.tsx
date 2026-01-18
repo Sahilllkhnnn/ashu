@@ -15,13 +15,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active session
+    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAdmin(!!session);
       setLoading(false);
     });
 
-    // Listen for changes
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {

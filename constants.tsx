@@ -96,33 +96,33 @@ export const DEFAULT_SERVICES: Service[] = [
 ];
 
 export const GALLERY_ITEMS: GalleryItem[] = [
-  { id: 1, category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed1/600/400', title: 'Royal Stage' },
-  { id: 2, category: 'Tent', imageUrl: 'https://picsum.photos/seed/tent1/600/400', title: 'Entrance Walkway' },
-  { id: 3, category: 'Lighting', imageUrl: 'https://picsum.photos/seed/light1/600/400', title: 'Night Ambience' },
-  { id: 4, category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed2/600/400', title: 'Mandap Setup' },
-  { id: 5, category: 'Party', imageUrl: 'https://picsum.photos/seed/party1/600/400', title: 'Birthday Theme' },
-  { id: 6, category: 'Tent', imageUrl: 'https://picsum.photos/seed/tent2/600/400', title: 'Dining Area Tent' },
-  { id: 7, category: 'Lighting', imageUrl: 'https://picsum.photos/seed/light2/600/400', title: 'LED Passage' },
-  { id: 8, category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed3/600/400', title: 'Floral Wall' },
+  { id: '1', category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed1/600/400', title: 'Royal Stage' },
+  { id: '2', category: 'Tent', imageUrl: 'https://picsum.photos/seed/tent1/600/400', title: 'Entrance Walkway' },
+  { id: '3', category: 'Lighting', imageUrl: 'https://picsum.photos/seed/light1/600/400', title: 'Night Ambience' },
+  { id: '4', category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed2/600/400', title: 'Mandap Setup' },
+  { id: '5', category: 'Party', imageUrl: 'https://picsum.photos/seed/party1/600/400', title: 'Birthday Theme' },
+  { id: '6', category: 'Tent', imageUrl: 'https://picsum.photos/seed/tent2/600/400', title: 'Dining Area Tent' },
+  { id: '7', category: 'Lighting', imageUrl: 'https://picsum.photos/seed/light2/600/400', title: 'LED Passage' },
+  { id: '8', category: 'Wedding', imageUrl: 'https://picsum.photos/seed/wed3/600/400', title: 'Floral Wall' },
 ];
 
 export const TESTIMONIALS: Testimonial[] = [
   {
-    id: 1,
+    id: '1',
     name: "Rahul Sharma",
     rating: 5,
     text: "Excellent decoration and timely service. The team made my sister's wedding look like a royal event. Very professional!",
     date: "Dec 2023"
   },
   {
-    id: 2,
+    id: '2',
     name: "Amit Patel",
     rating: 4,
     text: "Great tent arrangements for our community program. The pricing is also very reasonable compared to others in Umariya.",
     date: "Jan 2024"
   },
   {
-    id: 3,
+    id: '3',
     name: "Priya Singh",
     rating: 5,
     text: "Loved the floral decor for my engagement. They listened to all my requirements and delivered perfectly.",

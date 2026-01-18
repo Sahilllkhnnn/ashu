@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 interface FeedbackContextType {
   reviews: Testimonial[];
   addReview: (review: Omit<Testimonial, 'id' | 'date'>) => Promise<void>;
-  deleteReview: (id: number) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -22,9 +22,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching reviews:', error);
-      } else if (data) {
+      if (data) {
         const formattedReviews: Testimonial[] = data.map(item => ({
           id: item.id,
           name: item.name,
@@ -61,7 +59,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const deleteReview = async (id: number) => {
+  const deleteReview = async (id: string) => {
     try {
       const { error } = await supabase.from('feedback').delete().eq('id', id);
       if (error) throw error;

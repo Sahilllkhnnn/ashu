@@ -1,1 +1,1 @@
-// This file is deprecated. Please use lib/supabaseClient.ts
+// This file is deprecated. Supabase is now used via lib/supabaseClient.ts
