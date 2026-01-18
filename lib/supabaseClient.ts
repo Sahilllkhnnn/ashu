@@ -1,15 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// CRITICAL: These fallbacks ensure the app never crashes on Vercel even if env vars are lost.
-// In a highly sensitive app, we wouldn't hardcode these, but for a public client-side app, this is the safest fix for "blank screen".
-const PROJECT_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://qzulyczmsjztymaiiwmc.supabase.co';
-const ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_XTMMR2nnP2EP7czy4wQk4g_VaT4VOTA';
+// Vercel/Vite Environment Variable Handling
+// We prioritize Vercel Env Vars, but fallback to the provided keys to ensure the app NEVER crashes with a white screen.
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://qzulyczmsjztymaiiwmc.supabase.co';
+const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6dWx5Y3ptc2p6dHltYWlpd21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3MjU0MDUsImV4cCI6MjA4NDMwMTQwNX0.qBITi2VBbAINgd1jJ71rupMnW_bGIYdji2uoAUf-ZIw';
 
-if (!PROJECT_URL || !ANON_KEY) {
-  console.error("Supabase credentials missing. App will not function.");
-}
-
-export const supabase = createClient(PROJECT_URL, ANON_KEY, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

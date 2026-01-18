@@ -56,15 +56,18 @@ const AdminDashboard: React.FC = () => {
     setIsUploading(true);
     try {
       if (editingService) {
+        // Update existing service
         await updateService({ ...editingService, ...serviceForm });
+        alert('Service updated! (Note: Image updates for existing services not implemented in this demo)');
       } else {
+        // Add new service
         await addService(serviceForm, serviceImageFile || undefined);
+        alert('Service added successfully!');
       }
       setIsServiceModalOpen(false);
       setEditingService(null);
       setServiceForm({ title: '', description: '', iconName: 'Tent' });
       setServiceImageFile(null);
-      alert('Service saved successfully!');
     } catch (e: any) {
       console.error(e);
       alert('Error saving service: ' + e.message);

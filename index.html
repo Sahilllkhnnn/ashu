@@ -1,140 +1,70 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Azad Tent House | Premium Wedding Decorators</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                dark: '#0f0505', // Almost black maroon
-                maroon: '#450a0a', // Deep rich maroon
-                red: '#7f1d1d', // Standard dark red
-                gold: '#d4af37', // Metallic Gold
-                goldLight: '#f3e5ab', // Champagne
-                charcoal: '#1c1917',
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-            },
-            animation: {
-              'float': 'float 6s ease-in-out infinite',
-              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-              'glow': 'glow 3s ease-in-out infinite alternate',
-              'spin-slow': 'spin 12s linear infinite',
-            },
-            keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              },
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(40px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              glow: {
-                '0%': { boxShadow: '0 0 5px #7f1d1d' },
-                '100%': { boxShadow: '0 0 20px #d4af37, 0 0 10px #7f1d1d' }
-              }
-            },
-            backgroundImage: {
-              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-              'hero-pattern': "url('https://www.transparenttextures.com/patterns/cubes.png')",
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body {
-        background-color: #0f0505;
-        color: #f3f4f6;
-      }
-      
-      /* Premium Scrollbar */
-      ::-webkit-scrollbar {
-        width: 10px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #1c1917;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: linear-gradient(to bottom, #7f1d1d, #d4af37);
-        border-radius: 5px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #d4af37;
-      }
-
-      /* Glassmorphism Classes */
-      .glass {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      
-      .glass-dark {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-      }
-
-      /* 3D Card Effects */
-      .card-3d-wrapper {
-        perspective: 1000px;
-      }
-      .card-3d {
-        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
-        transform-style: preserve-3d;
-      }
-      .card-3d:hover {
-        transform: translateY(-10px) rotateX(2deg);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(127, 29, 29, 0.3);
-      }
-      
-      /* Text Gradients */
-      .text-gradient-gold {
-        background: linear-gradient(to right, #f3e5ab, #d4af37, #f3e5ab);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-size: 200% auto;
-        animation: shimmer 3s linear infinite;
-      }
-
-      @keyframes shimmer {
-        to {
-          background-position: 200% center;
-        }
-      }
-    </style>
-  <script type="importmap">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azad Tent House</title>
+  <link rel="stylesheet" href="./style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.39.0"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.90.1",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "path": "https://esm.sh/path@^0.12.7"
   }
 }
 </script>
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo">Azad<span class="text-gold">Tent</span>House</a>
+      <div class="nav-links">
+        <a href="/" class="active">Home</a>
+        <a href="/services.html">Services</a>
+        <a href="/gallery.html">Gallery</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header style="height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1519225421980-715cb0202128?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') center/cover;">
+    <div class="container">
+      <h2 class="text-gold" style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 1rem;">The Art of Celebration</h2>
+      <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Royal Weddings &<br>Unforgettable Events</h1>
+      <a href="/contact.html" class="btn">Book Now</a>
+    </div>
+  </header>
+
+  <section class="container" style="padding: 80px 20px;">
+    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 40px;">Why Choose Us?</h2>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+      <div class="card">
+        <h3 class="text-gold">Since 1995</h3>
+        <p>Over 25 years of experience serving Chandia and Umariya.</p>
+      </div>
+      <div class="card">
+        <h3 class="text-gold">Premium Decor</h3>
+        <p>From German hangars to floral mandaps, we have it all.</p>
+      </div>
+      <div class="card">
+        <h3 class="text-gold">Professional</h3>
+        <p>Uniformed staff and timely execution guaranteed.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Azad Tent House. All rights reserved.</p>
+      <p><a href="/admin.html" style="font-size: 0.8rem; opacity: 0.5;">Admin Login</a></p>
+    </div>
+  </footer>
+</body>
 </html>

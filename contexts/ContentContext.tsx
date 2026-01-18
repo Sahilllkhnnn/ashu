@@ -33,24 +33,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (servicesError) {
-        console.warn("Supabase services fetch failed (likely empty table):", servicesError.message);
-      } else if (servicesData && servicesData.length > 0) {
+      if (!servicesError && servicesData && servicesData.length > 0) {
         setServices(servicesData.map(s => ({
           id: s.id,
           title: s.title,
           description: s.description,
-          iconName: s.icon_name || 'Tent',
+          iconName: s.icon_name || s.icon || 'Tent', // Handle mapping
           imageUrl: s.image_url,
           category: s.category,
           active: s.active
         })));
       }
 
-      // 2. Fetch Settings
-      const { data: settingsData, error: settingsError } = await supabase.from('settings').select('*');
-      
-      if (!settingsError && settingsData) {
+      // 2. Fetch Settings (Business Info & Site Content)
+      // Assuming a 'settings' table exists. If not, defaults are used.
+      const { data: settingsData } = await supabase.from('settings').select('*');
+      if (settingsData) {
         settingsData.forEach(item => {
           if (item.key === 'business_info') setBusinessInfo(item.value);
           if (item.key === 'site_content') setSiteContent(item.value);
@@ -58,8 +56,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
     } catch (err) {
-      console.error('Unexpected error fetching content:', err);
-      // Fallback to defaults is already set in initial state
+      console.error('Content fetch error (using defaults):', err);
     } finally {
       setLoading(false);
     }
@@ -71,10 +68,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addService = async (service: Omit<Service, 'id'>, imageFile?: File) => {
     try {
-      let imageUrl = service.imageUrl;
+      let publicUrl = service.imageUrl;
 
+      // 1. Upload Image if provided
       if (imageFile) {
-        // Upload to 'service-images' bucket
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         
@@ -82,20 +79,21 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           .from('service-images')
           .upload(fileName, imageFile);
         
-        if (uploadError) throw uploadError;
+        if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
         
-        const { data: { publicUrl } } = supabase.storage
+        const { data } = supabase.storage
           .from('service-images')
           .getPublicUrl(fileName);
           
-        imageUrl = publicUrl;
+        publicUrl = data.publicUrl;
       }
 
+      // 2. Insert into DB
       const { error } = await supabase.from('services').insert([{
         title: service.title,
         description: service.description,
-        icon_name: service.iconName,
-        image_url: imageUrl,
+        icon_name: service.iconName, // Map types.ts iconName to DB icon_name
+        image_url: publicUrl,
         category: service.category
       }]);
       
@@ -129,9 +127,11 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteService = async (id: string, imageUrl?: string) => {
     try {
+      // Delete from DB
       const { error } = await supabase.from('services').delete().eq('id', id);
       if (error) throw error;
 
+      // Delete from Storage
       if (imageUrl) {
         const urlParts = imageUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];

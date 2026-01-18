@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Azad Tent House</title>
+  <link rel="stylesheet" href="./style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo">Azad<span class="text-gold">Tent</span>House</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/admin.html" class="active">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding: 60px 20px; max-width: 600px;">
+    
+    <!-- Login View -->
+    <div id="login-view" class="card">
+      <h2 style="text-align: center; margin-bottom: 20px;">Admin Login</h2>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <p id="loginError" style="color: red; margin-bottom: 10px; display: none;"></p>
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+      </form>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Dashboard</h1>
+        <button id="logoutBtn" class="btn" style="background: #333; color: white;">Logout</button>
+      </div>
+
+      <div class="card">
+        <h3 class="text-gold" style="margin-bottom: 20px;">Upload Gallery Image</h3>
+        <form id="uploadForm">
+          <label>Title</label>
+          <input type="text" id="imgTitle" required>
+          
+          <label>Category</label>
+          <select id="imgCategory">
+            <option value="Wedding">Wedding</option>
+            <option value="Tent">Tent</option>
+            <option value="Lighting">Lighting</option>
+            <option value="Party">Party</option>
+          </select>
+
+          <label>Image File</label>
+          <input type="file" id="imgFile" accept="image/*" required>
+
+          <button type="submit" id="uploadBtn" class="btn" style="width: 100%;">Upload Image</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { supabase } from './src/supabase.js';
+
+    const loginView = document.getElementById('login-view');
+    const dashboardView = document.getElementById('dashboard-view');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const uploadForm = document.getElementById('uploadForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    // 1. Check Session
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        loginView.style.display = 'none';
+        dashboardView.style.display = 'block';
+      } else {
+        loginView.style.display = 'block';
+        dashboardView.style.display = 'none';
+      }
+    }
+    checkUser();
+
+    // 2. Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.style.display = 'none';
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        loginError.innerText = error.message;
+        loginError.style.display = 'block';
+      } else {
+        checkUser();
+      }
+    });
+
+    // 3. Logout
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      checkUser();
+    });
+
+    // 4. Upload Logic
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = document.getElementById('imgFile').files[0];
+      const title = document.getElementById('imgTitle').value;
+      const category = document.getElementById('imgCategory').value;
+
+      if (!file) return;
+
+      uploadBtn.innerText = 'Uploading...';
+      uploadBtn.disabled = true;
+
+      try {
+        // A. Upload to Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('gallery-images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // B. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('gallery-images')
+          .getPublicUrl(fileName);
+
+        // C. Save to DB
+        const { error: dbError } = await supabase
+          .from('gallery')
+          .insert([{ title, category, image_url: publicUrl }]);
+
+        if (dbError) throw dbError;
+
+        alert('Image uploaded successfully!');
+        uploadForm.reset();
+      } catch (err) {
+        alert('Upload failed: ' + err.message);
+        console.error(err);
+      } finally {
+        uploadBtn.innerText = 'Upload Image';
+        uploadBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
