@@ -3,9 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azad Tent House</title>
+  <title>Azad Tent House | Premium Event Decor</title>
   <link rel="stylesheet" href="./style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#050202',
+              maroon: '#1a0505',
+              red: '#3d0a0a',
+              gold: '#d4af37',
+              goldLight: '#f3e5ab',
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Inter"', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            'float': 'float 6s ease-in-out infinite',
+            'shimmer': 'shimmer 2s infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            shimmer: {
+              '100%': { transform: 'translateX(100%)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
 <script type="importmap">
 {
   "imports": {
@@ -21,50 +61,8 @@
 }
 </script>
 </head>
-<body>
-  <nav>
-    <div class="container">
-      <a href="/" class="logo">Azad<span class="text-gold">Tent</span>House</a>
-      <div class="nav-links">
-        <a href="/" class="active">Home</a>
-        <a href="/services.html">Services</a>
-        <a href="/gallery.html">Gallery</a>
-        <a href="/contact.html">Contact</a>
-      </div>
-    </div>
-  </nav>
-
-  <header style="height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1519225421980-715cb0202128?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') center/cover;">
-    <div class="container">
-      <h2 class="text-gold" style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 1rem;">The Art of Celebration</h2>
-      <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Royal Weddings &<br>Unforgettable Events</h1>
-      <a href="/contact.html" class="btn">Book Now</a>
-    </div>
-  </header>
-
-  <section class="container" style="padding: 80px 20px;">
-    <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 40px;">Why Choose Us?</h2>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-      <div class="card">
-        <h3 class="text-gold">Since 1995</h3>
-        <p>Over 25 years of experience serving Chandia and Umariya.</p>
-      </div>
-      <div class="card">
-        <h3 class="text-gold">Premium Decor</h3>
-        <p>From German hangars to floral mandaps, we have it all.</p>
-      </div>
-      <div class="card">
-        <h3 class="text-gold">Professional</h3>
-        <p>Uniformed staff and timely execution guaranteed.</p>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container">
-      <p>&copy; 2024 Azad Tent House. All rights reserved.</p>
-      <p><a href="/admin.html" style="font-size: 0.8rem; opacity: 0.5;">Admin Login</a></p>
-    </div>
-  </footer>
+<body class="bg-brand-dark text-white antialiased selection:bg-brand-gold selection:text-black">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>
