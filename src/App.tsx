@@ -15,7 +15,6 @@ import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
 import { Loader2 } from 'lucide-react';
 
-// Scroll to top on route change
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -33,7 +32,6 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-// Global Error Boundary
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
@@ -102,6 +100,7 @@ const App: React.FC = () => {
                         <Route path="/gallery" element={<Gallery />} />
                         <Route path="/contact" element={<Contact />} />
                         <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="*" element={<Home />} />
                       </Routes>
                     </Layout>
                   </Suspense>
