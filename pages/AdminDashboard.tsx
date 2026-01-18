@@ -56,19 +56,18 @@ const AdminDashboard: React.FC = () => {
     setIsUploading(true);
     try {
       if (editingService) {
-        // Edit mode (image update not implemented in this simple modal for brevity, but model supports it)
         await updateService({ ...editingService, ...serviceForm });
       } else {
-        // Add mode
         await addService(serviceForm, serviceImageFile || undefined);
       }
       setIsServiceModalOpen(false);
       setEditingService(null);
       setServiceForm({ title: '', description: '', iconName: 'Tent' });
       setServiceImageFile(null);
-    } catch (e) {
+      alert('Service saved successfully!');
+    } catch (e: any) {
       console.error(e);
-      alert('Error saving service');
+      alert('Error saving service: ' + e.message);
     } finally {
       setIsUploading(false);
     }
@@ -82,16 +81,23 @@ const AdminDashboard: React.FC = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadFile || !uploadTitle) return;
+    if (!uploadFile || !uploadTitle) {
+      alert("Please select a file and enter a title");
+      return;
+    }
 
     setIsUploading(true);
     try {
       await uploadImage(uploadFile, uploadTitle, uploadCategory);
       setUploadFile(null);
       setUploadTitle('');
+      // Reset file input
+      const fileInput = document.getElementById('gallery-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      
       alert('Image uploaded successfully');
     } catch (e: any) {
-      alert('Failed to upload image. ' + (e.message || ''));
+      alert('Failed to upload image. ' + (e.message || 'Check console'));
     } finally {
       setIsUploading(false);
     }
@@ -105,7 +111,6 @@ const AdminDashboard: React.FC = () => {
     alert('Website content updated successfully!');
   };
 
-  // Auth Guard
   if (authLoading) return <div className="min-h-screen bg-brand-dark flex items-center justify-center"><Loader2 className="animate-spin text-brand-gold" /></div>;
 
   if (!isAdmin) {
@@ -186,7 +191,6 @@ const AdminDashboard: React.FC = () => {
         </div>
       ))}
       
-      {/* Recent Activity / Feedback Preview */}
       <div className="col-span-1 md:col-span-2 lg:col-span-4 bg-[#120808] border border-white/10 rounded-xl p-6 mt-6">
         <h3 className="text-lg font-bold text-white mb-4">Latest Feedback</h3>
         <div className="space-y-4">
@@ -324,7 +328,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
                 <div className="md:col-span-1">
                     <label className="block text-gray-400 text-xs uppercase font-bold mb-2">File</label>
-                    <input type="file" accept="image/*" onChange={(e) => setUploadFile(e.target.files ? e.target.files[0] : null)} className="w-full text-gray-400 text-xs" required />
+                    <input id="gallery-upload" type="file" accept="image/*" onChange={(e) => setUploadFile(e.target.files ? e.target.files[0] : null)} className="w-full text-gray-400 text-xs" required />
                 </div>
                 <div className="md:col-span-1">
                     <button type="submit" disabled={isUploading} className="w-full bg-brand-gold text-black font-bold py-2.5 rounded uppercase text-xs tracking-widest hover:bg-white disabled:opacity-50">

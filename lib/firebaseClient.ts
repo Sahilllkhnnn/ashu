@@ -1,1 +1,2 @@
-// This file is deprecated and deleted. Use lib/supabaseClient.ts
+// DEPRECATED. Firebase has been completely removed.
+// Use lib/supabaseClient.ts for all backend operations.

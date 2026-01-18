@@ -28,12 +28,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setLoading(true);
     try {
       // 1. Fetch Services
-      const { data: servicesData, error } = await supabase
+      const { data: servicesData, error: servicesError } = await supabase
         .from('services')
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (!error && servicesData && servicesData.length > 0) {
+      if (servicesError) {
+        console.warn("Supabase services fetch failed (likely empty table):", servicesError.message);
+      } else if (servicesData && servicesData.length > 0) {
         setServices(servicesData.map(s => ({
           id: s.id,
           title: s.title,
@@ -45,10 +47,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         })));
       }
 
-      // 2. Fetch Settings (Business Info & Site Content)
-      const { data: settingsData } = await supabase.from('settings').select('*');
+      // 2. Fetch Settings
+      const { data: settingsData, error: settingsError } = await supabase.from('settings').select('*');
       
-      if (settingsData) {
+      if (!settingsError && settingsData) {
         settingsData.forEach(item => {
           if (item.key === 'business_info') setBusinessInfo(item.value);
           if (item.key === 'site_content') setSiteContent(item.value);
@@ -56,7 +58,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
 
     } catch (err) {
-      console.error('Error fetching content:', err);
+      console.error('Unexpected error fetching content:', err);
+      // Fallback to defaults is already set in initial state
     } finally {
       setLoading(false);
     }
@@ -71,8 +74,10 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       let imageUrl = service.imageUrl;
 
       if (imageFile) {
+        // Upload to 'service-images' bucket
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
         const { error: uploadError } = await supabase.storage
           .from('service-images')
           .upload(fileName, imageFile);
@@ -118,6 +123,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await refreshContent();
     } catch (e) {
       console.error("Update service error", e);
+      throw e;
     }
   };
 
@@ -129,7 +135,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (imageUrl) {
         const urlParts = imageUrl.split('/');
         const fileName = urlParts[urlParts.length - 1];
-        if (fileName) {
+        if (fileName && fileName.trim() !== '') {
             await supabase.storage.from('service-images').remove([fileName]);
         }
       }
@@ -137,6 +143,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       await refreshContent();
     } catch (e) {
       console.error("Delete service error", e);
+      throw e;
     }
   };
 
@@ -146,6 +153,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setBusinessInfo(info);
     } catch (e) {
       console.error(e);
+      throw e;
     }
   };
 
@@ -155,6 +163,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setSiteContent(content);
     } catch (e) {
       console.error(e);
+      throw e;
     }
   };
 

@@ -23,7 +23,11 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (data && data.length > 0) {
+      if (error) {
+        console.warn("Supabase fetch error:", error);
+        // Don't overwrite with defaults if it's a real error, just show empty
+        if (data === null) setGalleryItems(DEFAULT_GALLERY); 
+      } else if (data && data.length > 0) {
         const formattedItems: GalleryItem[] = data.map(item => ({
           id: item.id,
           title: item.title,
@@ -32,6 +36,7 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
         setGalleryItems(formattedItems);
       } else {
+        // If empty table, show defaults for demo purposes, or empty array
         setGalleryItems(DEFAULT_GALLERY);
       }
     } catch (err) {
@@ -48,27 +53,32 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const uploadImage = async (file: File, title: string, category: string) => {
     try {
+      // 1. Sanitize filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
+      // 2. Upload to Storage
       const { error: uploadError } = await supabase.storage
         .from('gallery-images')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) throw new Error(`Storage Error: ${uploadError.message}`);
 
+      // 3. Get Public URL
       const { data: { publicUrl } } = supabase.storage
         .from('gallery-images')
         .getPublicUrl(fileName);
 
+      // 4. Insert into Database
       const { error: dbError } = await supabase.from('gallery').insert([{
         title,
         category,
         image_url: publicUrl,
       }]);
 
-      if (dbError) throw dbError;
+      if (dbError) throw new Error(`Database Error: ${dbError.message}`);
 
+      // 5. Refresh
       await fetchGallery();
     } catch (err) {
       console.error('Error uploading image:', err);
@@ -78,6 +88,7 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const deleteImage = async (id: string, imageUrl: string) => {
     try {
+      // 1. Delete from DB
       const { error: dbError } = await supabase
         .from('gallery')
         .delete()
@@ -85,12 +96,13 @@ export const GalleryProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (dbError) throw dbError;
 
-      // Extract filename from URL
-      const urlParts = imageUrl.split('/');
-      const fileName = urlParts[urlParts.length - 1];
-      
-      if (fileName) {
-        await supabase.storage.from('gallery-images').remove([fileName]);
+      // 2. Delete from Storage
+      if (imageUrl) {
+        const urlParts = imageUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        if (fileName) {
+          await supabase.storage.from('gallery-images').remove([fileName]);
+        }
       }
 
       setGalleryItems(prev => prev.filter(item => item.id !== id));

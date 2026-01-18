@@ -23,7 +23,10 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (data && data.length > 0) {
+      if (error) {
+        console.warn("Supabase feedback fetch failed:", error.message);
+        setReviews(DEFAULT_REVIEWS);
+      } else if (data && data.length > 0) {
         const formattedReviews: Testimonial[] = data.map(item => ({
           id: item.id,
           name: item.name,
